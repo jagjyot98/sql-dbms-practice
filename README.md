@@ -15,7 +15,7 @@ Each exercise file contains: question → my attempt → ✅/❌ review → corr
 | Day 4 | JOINs Part 1 | ✅ |
 | Day 5 | JOINs Part 2 (Self JOIN, Multi-table) | ✅ |
 | Day 6 | Subqueries | ✅ |
-| Day 7 | Review Day | ⏳ |
+| Day 7 | String & Date Functions | ✅ |
 | Day 8 | String & Date Functions | ⏳ |
 | Day 9 | CASE Expressions | ⏳ |
 | Day 10 | Window Functions Part 1 | ⏳ |
@@ -175,6 +175,51 @@ ON e.manager_id = m.emp_id
 employees → emp_projects → projects
   e.emp_id = ep.emp_id
                ep.project_id = p.project_id
+```
+
+---
+
+### Day 7 — String & Date Functions
+
+**Key lesson: Don't wrap direct functions in unnecessary subqueries**
+
+```sql
+-- If the function runs on the SAME row's column → use directly in WHERE:
+WHERE STRFTIME('%m', hire_date) = '03'          ✅
+WHERE LENGTH(first_name || last_name) > 10      ✅
+
+-- Only subquery when pulling a value FROM ANOTHER ROW/TABLE:
+WHERE salary > (SELECT AVG(salary) FROM employees)  ✅
+```
+
+**Operator precedence gotcha with JULIANDAY:**
+```sql
+-- Wrong (division runs before subtraction):
+julianday('now') - julianday(hire_date) / 365
+
+-- Correct (parentheses enforce order):
+(JULIANDAY('now') - JULIANDAY(hire_date)) / 365
+```
+
+**Mistakes made:**
+- Ex 2: Missing parentheses → wrong operator precedence
+- Ex 3 & 5: Wrapped direct column functions in subqueries → subquery returns multiple rows, `=` fails
+
+**Optimization — Non-sargable functions in WHERE:**
+
+| Function in WHERE | Index used? | Production Fix |
+|------------------|-------------|----------------|
+| `STRFTIME('%m', hire_date)` | ❌ No | Store `hire_month INT` as separate column |
+| `LENGTH(first_name \|\| last_name) > 10` | ❌ No | Use a computed/generated column |
+| `JULIANDAY(hire_date)` | ❌ No | Compare dates directly |
+
+Sargable alternative:
+```sql
+-- Instead of (non-sargable):
+WHERE STRFTIME('%Y', hire_date) = '2020'
+
+-- Use (sargable — can use index on hire_date):
+WHERE hire_date >= '2020-01-01' AND hire_date < '2021-01-01'
 ```
 
 ---
