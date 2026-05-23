@@ -16,8 +16,8 @@ Each exercise file contains: question → my attempt → ✅/❌ review → corr
 | Day 5 | JOINs Part 2 (Self JOIN, Multi-table) | ✅ |
 | Day 6 | Subqueries | ✅ |
 | Day 7 | String & Date Functions | ✅ |
-| Day 8 | String & Date Functions | ⏳ |
-| Day 9 | CASE Expressions | ⏳ |
+| Day 8 | CASE Expressions | ✅ |
+| Day 9 | Window Functions Part 1 | ⏳ |
 | Day 10 | Window Functions Part 1 | ⏳ |
 | Day 11 | Window Functions Part 2 | ⏳ |
 | Day 12 | CTEs & Views | ⏳ |
@@ -176,6 +176,37 @@ employees → emp_projects → projects
   e.emp_id = ep.emp_id
                ep.project_id = p.project_id
 ```
+
+---
+
+### Day 8 — CASE Expressions
+
+**Key lesson: Cascading conditions — first match wins**
+
+```sql
+-- Instead of AND ranges (fragile, boundary gaps):
+WHEN salary > 65000 AND salary < 85000 THEN 'Mid'
+
+-- Use cascading (clean, no gaps):
+WHEN salary >= 85000 THEN 'High'
+WHEN salary >= 65000 THEN 'Mid'   -- only reached if not already High
+ELSE 'Low'
+```
+
+**`COUNT(CASE...)` pattern — pivot rows into columns:**
+```sql
+COUNT(CASE WHEN salary >= 85000 THEN 1 END) AS high_count
+-- COUNT skips NULLs → when CASE is false with no ELSE, returns NULL → not counted
+```
+
+**Mistakes made:**
+- Ex 1, 3: Quoted numeric values `'85000'` — never quote numbers, breaks in PostgreSQL/MySQL
+- Ex 2: AND range conditions created boundary gap (exactly 2 or 5 years → NULL)
+- Ex 5: Used `IS` for equality — `IS`/`IS NOT` is for NULL checks only, use `=`
+
+**Optimization:**
+- `CASE` in `SELECT` is computed per row — no index can help
+- Avoid repeating long expressions (e.g., JULIANDAY tenure calc) in every WHEN — wrap in a CTE to compute once (covered Day 12)
 
 ---
 
