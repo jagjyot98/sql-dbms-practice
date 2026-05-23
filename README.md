@@ -29,7 +29,8 @@ Each exercise file contains: question → my attempt → ✅/❌ review → corr
 ## Structure
 
 ```
-exercises/                    — Daily SQL exercise files
+exercises/                    — Daily SQL exercise files (attempts + reviews)
+notes/                        — Complete concept guides per day (syntax + examples + shortcomings)
 SQL_DBMS_Curriculum.md        — Full curriculum with schema setup
 README.md                     — This file
 ```
