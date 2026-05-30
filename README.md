@@ -18,6 +18,7 @@ Each exercise file contains: question → my attempt → ✅/❌ review → corr
 | Day 7 | String & Date Functions | ✅ |
 | Day 8 | CASE Expressions | ✅ |
 | Revision | Days 1–5 Mixed Practice | ✅ |
+| Revision | Days 6–8 Mixed Practice | ✅ |
 | Day 9 | Window Functions Part 1 | ⏳ |
 | Day 10 | Window Functions Part 1 | ⏳ |
 | Day 11 | Window Functions Part 2 | ⏳ |
