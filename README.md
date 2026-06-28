@@ -19,7 +19,7 @@ Each exercise file contains: question → my attempt → ✅/❌ review → corr
 | Day 8 | CASE Expressions | ✅ |
 | Revision | Days 1–5 Mixed Practice | ✅ |
 | Revision | Days 6–8 Mixed Practice | ✅ |
-| Day 9 | Window Functions Part 1 | ⏳ |
+| Day 9 | Window Functions Part 1 | ✅ |
 | Day 10 | Window Functions Part 1 | ⏳ |
 | Day 11 | Window Functions Part 2 | ⏳ |
 | Day 12 | CTEs & Views | ⏳ |
@@ -179,6 +179,50 @@ employees → emp_projects → projects
   e.emp_id = ep.emp_id
                ep.project_id = p.project_id
 ```
+
+---
+
+### Day 9 — Window Functions Part 1
+
+**Key lesson: Window functions keep all rows — GROUP BY collapses them**
+
+```sql
+-- GROUP BY: 4 rows (one per dept)
+SELECT dept_id, AVG(salary) FROM employees GROUP BY dept_id;
+
+-- Window: 8 rows (all employees, each with dept avg alongside)
+SELECT first_name, AVG(salary) OVER (PARTITION BY dept_id) AS dept_avg FROM employees;
+```
+
+**Ranking functions:**
+
+| Function | Ties | Skips rank? | Best for |
+|----------|------|-------------|----------|
+| `ROW_NUMBER` | No | N/A | Top-N per group |
+| `RANK` | Yes | ✅ Yes | Leaderboards |
+| `DENSE_RANK` | Yes | ❌ No | Tier grouping |
+
+**Top-N per group pattern:**
+```sql
+SELECT * FROM (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS rn
+    FROM employees
+) WHERE rn = 1;
+```
+Use `ROW_NUMBER` not `RANK` — guarantees exactly one row per group.
+
+**Critical rule:** Window functions cannot be used in WHERE directly — always wrap in a subquery.
+
+**NTILE + CASE pattern — compute once, label in outer query:**
+```sql
+SELECT first_name, salary, quartile,
+    CASE quartile WHEN 1 THEN 'Top 25%' WHEN 2 THEN 'Upper Mid' ... END AS band
+FROM (SELECT first_name, salary, NTILE(4) OVER (ORDER BY salary DESC) AS quartile FROM employees);
+```
+
+**Mistakes made:**
+- Ex 3: `ORDER BY salary` (ASC) — salary ranking convention is DESC
+- Ex 5: Incomplete CASE — only `WHEN 1` covered, quartiles 2–4 returned NULL
 
 ---
 
